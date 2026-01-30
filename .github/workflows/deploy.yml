@@ -55,8 +55,14 @@ jobs:
       - name: Deploy on EC2 via SSM
         run: |
           INSTANCE_ID="i-0493567b5c7e6e358"
+          
+          # Full path to docker-compose on EC2
+          DOCKER_COMPOSE="/usr/local/bin/docker-compose"
+
+          # Commands to run on the EC2 instance
           COMMANDS='[
-            "sudo -u ubuntu bash -lc \"cd /home/ubuntu/car_tracker && git pull origin main && docker-compose up -d --build --force-recreate\""
+            "sudo -u ubuntu git config --global --add safe.directory /home/ubuntu/car_tracker",
+            "sudo -u ubuntu bash -c '\''cd /home/ubuntu/car_tracker && $DOCKER_COMPOSE up -d --build --force-recreate'\''"
           ]'
 
           echo "Sending command to EC2 via SSM..."
