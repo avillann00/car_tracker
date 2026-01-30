@@ -58,7 +58,7 @@ jobs:
           COMMANDS='[
             "cd /home/ubuntu/car_tracker",
             "git pull origin main",
-            "docker compose up -d --build --force-recreate"
+            "docker-compose up -d --build --force-recreate"
           ]'
 
           echo "Sending command to EC2 via SSM..."
