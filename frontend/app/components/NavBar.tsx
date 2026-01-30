@@ -1,6 +1,6 @@
 'use client'
 
-import HamburgerButton from './HamburgerButton.tsx'
+import HamburgerButton from './HamburgerButton'
 
 export default function NavBar(){
   return(
