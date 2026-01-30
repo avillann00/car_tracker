@@ -56,10 +56,7 @@ jobs:
         run: |
           INSTANCE_ID="i-0493567b5c7e6e358"
           COMMANDS='[
-            "cd /home/ubuntu/car_tracker",
-            "git config --global --add safe.directory /home/ubuntu/car_tracker",
-            "git pull origin main",
-            "docker-compose up -d --build --force-recreate"
+            "sudo -u ubuntu bash -lc \"cd /home/ubuntu/car_tracker && git pull origin main && docker-compose up -d --build --force-recreate\""
           ]'
 
           echo "Sending command to EC2 via SSM..."
