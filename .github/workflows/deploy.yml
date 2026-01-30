@@ -20,16 +20,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1  
 
-      - name: Deploy on EC2
-        uses: aws-actions/aws-ssm-send-command@v1
-        with:
-          aws-region: us-east-1           
-          instance-ids: i-0abc123def4567890  
-          document-name: AWS-RunShellScript
-          parameters: |
-            commands:
-              - echo "Starting deployment on EC2..."
-              - cd /home/ubuntu/car_tracker       # Adjust path
-              - git pull origin main
-              - docker compose up -d --build
-              - echo "Deployment complete!"
+      - name: Deploy on EC2 via SSM
+        run: |
+          INSTANCE_ID="i-0493567b5c7e6e358"  # Replace with your EC2 instance ID
+          COMMAND="cd /home/ubuntu/car_tracker && git pull origin main && docker compose up -d --build"
+          echo "Sending command to EC2 via SSM..."
+          aws ssm send-command \
+            --targets "Key=instanceIds,Values=$INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploy from GitHub Actions" \
+            --parameters "commands=$COMMAND" \
+            --region us-east-1
