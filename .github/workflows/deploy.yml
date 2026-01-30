@@ -6,7 +6,39 @@ on:
       - main
 
 jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with: 
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Make mvnw executable
+        working-directory: backend
+        run: chmod +x mvnw
+
+      - name: Build backend
+        working-directory: backend
+        run: ./mvnw test
+
   deploy:
+    needs: ci
     runs-on: ubuntu-latest
 
     steps:
