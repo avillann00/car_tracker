@@ -53,6 +53,7 @@ jobs:
             "sudo -u ubuntu bash -c '\''cd /home/ubuntu/car_tracker && git fetch origin main'\''",
             "sudo -u ubuntu bash -c '\''cd /home/ubuntu/car_tracker && git reset --hard origin/main'\''",
             "sudo -u ubuntu bash -c '\''cd /home/ubuntu/car_tracker && '"$DOCKER_COMPOSE"' down'\''",
+            "sudo docker system prune -f",
             "sudo -u ubuntu bash -c '\''cd /home/ubuntu/car_tracker && '"$DOCKER_COMPOSE"' up -d --build --force-recreate'\''"
           ]'
           echo "Sending command to EC2 via SSM..."
