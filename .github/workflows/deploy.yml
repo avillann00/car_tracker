@@ -51,7 +51,6 @@ jobs:
             "sudo -u ubuntu git fetch origin main",
             "sudo -u ubuntu git reset --hard origin/main",
             "sudo /usr/bin/docker-compose down",
-            "sudo docker system prune -f",
             "sudo /usr/bin/docker-compose up -d --build --force-recreate"
           ]'
           
