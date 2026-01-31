@@ -1,70 +1,60 @@
 name: Deploy to EC2 via SSM
-
 on:
   push:
     branches:
       - main
-
 jobs:
   ci:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Node 
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
       - name: Build frontend
         working-directory: frontend
         run: |
           npm ci
           npm run build
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with: 
           distribution: 'temurin'
           java-version: '21'
-
       - name: Make mvnw executable
         working-directory: backend
         run: chmod +x mvnw
-
       - name: Build backend
         working-directory: backend
         run: ./mvnw test
-
   deploy:
     needs: ci
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1  
-
       - name: Deploy on EC2 via SSM
         run: |
           INSTANCE_ID="i-0493567b5c7e6e358"
           
           # Full path to docker-compose on EC2
           DOCKER_COMPOSE="/usr/local/bin/docker-compose"
-
           # Commands to run on the EC2 instance
           COMMANDS='[
+            "set -e",
             "sudo -u ubuntu git config --global --add safe.directory /home/ubuntu/car_tracker",
-            "sudo -u ubuntu bash -c '\''cd /home/ubuntu/car_tracker && $DOCKER_COMPOSE up -d --build --force-recreate'\''"
+            "sudo -u ubuntu bash -c '\''cd /home/ubuntu/car_tracker && git fetch origin main'\''",
+            "sudo -u ubuntu bash -c '\''cd /home/ubuntu/car_tracker && git reset --hard origin/main'\''",
+            "sudo -u ubuntu bash -c '\''cd /home/ubuntu/car_tracker && '"$DOCKER_COMPOSE"' down'\''",
+            "sudo -u ubuntu bash -c '\''cd /home/ubuntu/car_tracker && '"$DOCKER_COMPOSE"' up -d --build --force-recreate'\''"
           ]'
-
           echo "Sending command to EC2 via SSM..."
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "$INSTANCE_ID" \
@@ -72,14 +62,11 @@ jobs:
             --parameters commands="$COMMANDS" \
             --query "Command.CommandId" \
             --output text)
-
           echo "Command ID: $COMMAND_ID"
           echo "Waiting for command to finish..."
-
           aws ssm wait command-executed \
             --command-id "$COMMAND_ID" \
             --instance-id "$INSTANCE_ID"
-
           echo "Fetching command output..."
           aws ssm get-command-invocation \
             --command-id "$COMMAND_ID" \
