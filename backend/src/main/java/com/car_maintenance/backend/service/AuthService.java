@@ -2,6 +2,8 @@ package com.car_maintenance.backend.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.car_maintenance.backend.dto.LoginRequest;
+import com.car_maintenance.backend.dto.LoginResponse;
 import com.car_maintenance.backend.dto.RegisterResponse;
 import com.car_maintenance.backend.dto.RegisterRequest;
 import com.car_maintenance.backend.model.User;
@@ -11,10 +13,23 @@ import com.car_maintenance.backend.repository.UserRepository;
 public class AuthService{
   private final PasswordEncoder encoder;
   private final UserRepository repo;
+  private final JwtService jwtService;
 
-  public AuthService(PasswordEncoder encoder, UserRepository repo){
+  public AuthService(PasswordEncoder encoder, UserRepository repo, JwtService jwtService){
     this.encoder = encoder;
     this.repo = repo;
+    this.jwtService = jwtService;
+  }
+
+  public LoginResponse login(LoginRequest request){
+    User user = repo.findByEmail(request.getEmail()).orElseThrow(() -> new RuntimeException("Invalid email"));
+
+    if(!encoder.matches(request.getPassword(), user.getPassword())){
+      throw new RuntimeException("Invalid password");
+    }
+
+    String token = jwtService.generateToken(user);
+    return new LoginResponse(token);
   }
 
   public RegisterResponse register(RegisterRequest request){

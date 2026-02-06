@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.car_maintenance.backend.dto.LoginRequest;
+import com.car_maintenance.backend.dto.LoginResponse;
 import com.car_maintenance.backend.dto.RegisterResponse;
 import com.car_maintenance.backend.dto.RegisterRequest;
 import com.car_maintenance.backend.service.AuthService;
@@ -21,6 +23,10 @@ public class AuthController{
     this.service = service;
   }
 
+  @PostMapping("/login")
+  public LoginResponse login(@Valid @RequestBody LoginRequest request){
+    return this.service.login(request);
+  }
 
   @PostMapping("/register")
   public RegisterResponse register(@Valid @RequestBody RegisterRequest request){
