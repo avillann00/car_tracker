@@ -8,39 +8,65 @@ export default function Register(){
   const router = useRouter()
 
   const [email, setEmail] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
 
-  const handleRegister = async () => {
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+
     try{
       if(email.length < 1){
         setError('Email is too short')
+        return
+      }
+
+      if(firstName.length < 1){
+        setError('First name is too short')
+        return
+      }
+
+      if(lastName.length < 1){
+        setError('Last name is too short')
+        return
       }
 
       if(password.length < 1){
         setError('Password is too short')
+        return
       }
 
       if(confirmPassword.length < 1){
         setError('Confirm password is too short')
+        return
       }
 
       if(password !== confirmPassword){
         setError('Passwords do not match')
+        return
       }
 
-      const response = await axios.post('', {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
         email,
-        password,
-        confirmPassword
+        firstName,
+        lastName,
+        password
       })
 
-      // on success redirect to login
-      // router.push('/login')
+      if(response.status === 200 || response.status === 201){
+        router.push('/login')
+      }
     }
-    catch{
-      setError('There was an error with registration')
+    catch(error){
+      if(axios.isAxiosError(error)){
+        setError(error.response?.data?.message ?? 'Registration failed')
+      } 
+      else{
+        setError('Unexpected error')
+      }   
     }
   }
 
@@ -56,6 +82,26 @@ export default function Register(){
               className='border border-2 rounded-md shadow-lg w-2/3'
               onChange={e => setEmail(e.target.value)}
               value={email}
+            />
+          </label>
+
+          <label className='flex flex-col text-center items-center'>
+            First Name
+            <input
+              type='text'
+              className='border border-2 rounded-md shadow-lg w-2/3'
+              onChange={e => setFirstName(e.target.value)}
+              value={firstName}
+            />
+          </label>
+
+          <label className='flex flex-col text-center items-center'>
+            LastName
+            <input
+              type='text'
+              className='border border-2 rounded-md shadow-lg w-2/3'
+              onChange={e => setLastName(e.target.value)}
+              value={lastName}
             />
           </label>
 
