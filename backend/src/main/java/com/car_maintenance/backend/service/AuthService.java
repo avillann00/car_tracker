@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.car_maintenance.backend.dto.LoginRequest;
 import com.car_maintenance.backend.dto.LoginResponse;
 import com.car_maintenance.backend.dto.RegisterResponse;
+import com.car_maintenance.backend.exception.EmailAlreadyRegisteredException;
 import com.car_maintenance.backend.dto.RegisterRequest;
 import com.car_maintenance.backend.model.User;
 import com.car_maintenance.backend.repository.UserRepository;
@@ -33,6 +34,10 @@ public class AuthService{
   }
 
   public RegisterResponse register(RegisterRequest request){
+    if(this.repo.existsByEmail(request.getEmail())){
+      throw new EmailAlreadyRegisteredException("Email already registered");
+    }
+
     User user = new User();
 
     user.setEmail(request.getEmail());
